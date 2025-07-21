@@ -1,0 +1,9 @@
+llm_backend: ollama
+embedding_backend: nomic
+skills:
+  - name: open_folder
+    description: Open a folder in the file explorer
+    command: python skills/open_folder.py --path {path}
+  - name: delete_file
+    description: Delete a file or send to trash
+    command: python skills/delete_file.py --file {file}
