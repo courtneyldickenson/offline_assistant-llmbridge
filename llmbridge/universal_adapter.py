@@ -14,6 +14,28 @@ import time
 LOG_PATH = Path("logs/skill_router.log.jsonl")
 LOG_PATH.parent.mkdir(exist_ok=True)
 
+# ---------- Helpers: Argument Extraction & Building ----------
+def extract_metadata_arg(result, key="path"):
+    """Safely extract a metadata field from a RAG result."""
+    return result.get("metadata", {}).get(key, "") or result.get(key, "")
+
+def build_args_from_results(required_args, result_map):
+    """
+    required_args: ['old_path', 'new_path', ...]
+    result_map: {'old_path': rag_result1, ...}
+    Returns a dict {arg_name: value_str} suitable for CLI templates.
+    """
+    args = {}
+    for arg in required_args:
+        if arg.endswith('_path'):
+            args[arg] = extract_metadata_arg(result_map[arg], "path")
+        elif arg.endswith('_name'):
+            args[arg] = extract_metadata_arg(result_map[arg], "name")
+        else:
+            args[arg] = str(result_map[arg])
+    return args
+# ------------------------------------------------------------
+
 class UniversalAdapter:
     def __init__(self, config_path, use_llm=False):
         print("[DEBUG] Initializing UniversalAdapter...")
@@ -72,14 +94,16 @@ class UniversalAdapter:
                 break
             print(f"\nWhich {arg_name} did you mean?")
             for idx, match in enumerate(options, 1):
-                print(f"{idx}. {match.get('path', str(match))}")
+                display_val = extract_metadata_arg(match, "path") or str(match)
+                print(f"{idx}. {display_val}")
             print("[n] Next page")
             print("[x] Cancel")
             choice = input("> ").strip().lower()
             if choice.isdigit() and 1 <= int(choice) <= len(options):
-                chosen = options[int(choice)-1].get("path", str(options[int(choice)-1]))
-                print(f"[DEBUG] User chose: {chosen}")
-                return chosen
+                chosen = options[int(choice)-1]
+                path_str = extract_metadata_arg(chosen, 'path')
+                print(f"[DEBUG] User chose: {path_str}")
+                return path_str   # <--- Only the string path!
             elif choice == "n":
                 page += 1
             elif choice == "x":
@@ -90,6 +114,7 @@ class UniversalAdapter:
         manual = input(f"Enter {arg_name} manually: ")
         print(f"[DEBUG] User manually entered: {manual}")
         return manual
+
 
     def query_rag_api(self, query, top_k=10):
         payload = {"query": query}
@@ -113,6 +138,7 @@ class UniversalAdapter:
 
     def extract_args_from_query(self, user_query):
         print(f"[DEBUG] Extracting args from user query: '{user_query}'")
+        # TODO: NLP extraction from user_query for smart autofill (future)
         return {}
 
     def route(self, user_input):
@@ -129,10 +155,15 @@ class UniversalAdapter:
         skill_command = chosen_skill["command"]
         required_args = self.get_required_args(skill_command)
         provided_args = self.extract_args_from_query(user_input)
+        # --- Always use cleaned arguments in template ---
         for arg in required_args:
             if arg not in provided_args or not provided_args[arg]:
                 provided_args[arg] = self.prompt_for_argument(arg, user_input)
-        filled_command = self.fill_command_template(skill_command, provided_args)
+        # DEBUG: show args before and after cleaning
+        print(f"[DEBUG] Provided args (raw): {provided_args}")
+        provided_args_clean = build_args_from_results(required_args, provided_args)
+        print(f"[DEBUG] Provided args (clean): {provided_args_clean}")
+        filled_command = self.fill_command_template(skill_command, provided_args_clean)
 
         result = {
             "chosen_skill": chosen_skill["name"],

@@ -15,10 +15,13 @@ skills:
     description: Rename a folder from old_path to new_path
     command: python skills/rename_folder.py --old_path {old_path} --new_path {new_path}
 
-  - name: open_folder
-    description: Open a folder in the file explorer
-    command: python skills/open_folder.py --path {path}
+
 
   - name: delete_file
     description: Delete a file or send to trash
     command: python skills/delete_file.py --file {file}
+
+  - name: open_file
+    description: Open a file in the default viewer (PDF, image, doc, etc)
+    command: python skills/open_file.py --path {path}
+
