@@ -1,12 +1,16 @@
+# llmbridge/embeddings/nomic_embedder.py
+import nomic
+from nomic import embed
 import numpy as np
 
 class NomicEmbedder:
+    def __init__(self, model_name="nomic-embed-text-v1.5"):
+        self.model_name = model_name
+       
+
     def encode(self, texts):
-        """
-        Fake embedding method.
-        Given a list of texts, returns a numpy array of shape (len(texts), 10).
-        Each text is represented by a vector of length 10, where all values
-        are simply the length of the text (just for dummy differentiation).
-        Replace this with actual embedding logic later.
-        """
-        return np.array([[len(text)] * 10 for text in texts])
+        if isinstance(texts, str):
+            texts = [texts]
+        result = embed.text(texts, model=self.model_name)
+        embeddings = np.array(result["embeddings"])
+        return embeddings

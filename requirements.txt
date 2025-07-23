@@ -1,5 +1,7 @@
+nomic
 PyYAML
 numpy
 scikit-learn
 pytest
 black
+send2trash
