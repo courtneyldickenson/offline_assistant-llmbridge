@@ -1,22 +1,15 @@
 from .exceptions import AdapterInitializationError, AdapterGenerationError
-from .adapters import ollama, llama_cpp, openai
-
-ADAPTERS = {
-    "ollama": ollama.OllamaAdapter,
-    "llama_cpp": llama_cpp.LlamaCppAdapter,
-    "openai": openai.OpenAIAdapter,
-}
-
+from .universal_adapter import UniversalAdapter
 
 class LLMBridge:
-    def __init__(self, adapter: str, config=None):
+    def __init__(self, config_path: str):
         try:
-            self.adapter = ADAPTERS[adapter]()
-        except KeyError as e:
-            raise AdapterInitializationError(f"Unknown adapter: {adapter}") from e
+            self.adapter = UniversalAdapter(config_path)
+        except Exception as e:
+            raise AdapterInitializationError(f"Failed to initialize UniversalAdapter: {e}") from e
 
-    def generate(self, prompt: str, **kwargs) -> str:
+    def route(self, user_input: str) -> dict:
         try:
-            return self.adapter.generate(prompt, **kwargs)
+            return self.adapter.route(user_input)
         except Exception as e:
             raise AdapterGenerationError(str(e))

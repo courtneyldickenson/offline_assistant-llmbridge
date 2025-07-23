@@ -1,5 +1,5 @@
-llm_backend: ollama
-embedding_backend: nomic
+llm_backend: llama3:latest
+embedding_backend: BAAI/bge-small-en-v1.5  # or nomic-embed-text:v1.5
 skills:
   - name: open_folder
     description: Open a folder in the file explorer

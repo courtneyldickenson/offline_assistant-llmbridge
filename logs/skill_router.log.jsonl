@@ -1,0 +1,2 @@
+{"timestamp": "2025-07-23T12:12:15.468837", "user_input": "open files", "predicted_skill": "open_folder", "description": "Open a folder in the file explorer", "score": 0.8384077548980713, "sentiment": "neutral", "confirmed": true}
+{"timestamp": "2025-07-23T12:12:36.692600", "user_input": "/bue", "predicted_skill": "delete_file", "description": "Delete a file or send to trash", "score": 0.5916332006454468, "sentiment": "neutral", "confirmed": false}
