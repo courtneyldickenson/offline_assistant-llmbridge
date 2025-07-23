@@ -1,9 +1,24 @@
-llm_backend: llama3:latest
-embedding_backend: BAAI/bge-small-en-v1.5  # or nomic-embed-text:v1.5
+llm_backend: llama3:latest             # The LLM to call if needed (not used for embeddings)
+embedding_backend: BAAI/bge-small-en-v1.5  # Local embedder model for routing
+
+
+argument_suggester:
+  mode: api
+  api_url: http://127.0.0.1:8000/search
+
 skills:
+  - name: create_folder
+    description: Create a new folder at the specified path
+    command: python skills/create_folder.py --path {path}
+
+  - name: rename_folder
+    description: Rename a folder from old_path to new_path
+    command: python skills/rename_folder.py --old_path {old_path} --new_path {new_path}
+
   - name: open_folder
     description: Open a folder in the file explorer
     command: python skills/open_folder.py --path {path}
+
   - name: delete_file
     description: Delete a file or send to trash
     command: python skills/delete_file.py --file {file}
